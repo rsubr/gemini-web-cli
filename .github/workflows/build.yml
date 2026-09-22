@@ -39,14 +39,18 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
+          set -euo pipefail
           out="gemini-web-cli-${GOOS}-${GOARCH}"
-          go build -buildvcs=false -trimpath -ldflags "-s -w" -o "dist/${out}" .
+          go build -buildvcs=false -trimpath -ldflags "-s -w -buildid=" -o "dist/${out}" .
+          gzip -9 -n "dist/${out}"
+          ls -l dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: gemini-web-cli-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/gemini-web-cli-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/gemini-web-cli-${{ matrix.goos }}-${{ matrix.goarch }}.gz
+          compression-level: 0
           if-no-files-found: error
 
   release:
@@ -90,5 +94,5 @@ jobs:
             --target "${GITHUB_SHA}" \
             --title "${{ steps.ver.outputs.tag }}" \
             --generate-notes \
-            dist/gemini-web-cli-linux-amd64 \
-            dist/gemini-web-cli-linux-arm64
+            dist/gemini-web-cli-linux-amd64.gz \
+            dist/gemini-web-cli-linux-arm64.gz
