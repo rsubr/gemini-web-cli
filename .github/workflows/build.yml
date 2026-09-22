@@ -48,3 +48,47 @@ jobs:
           name: gemini-web-cli-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/gemini-web-cli-${{ matrix.goos }}-${{ matrix.goarch }}
           if-no-files-found: error
+
+  release:
+    name: Release
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download binaries
+        uses: actions/download-artifact@v7
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Compute CalVer tag (YY.MM.NN)
+        id: ver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          prefix="$(date -u +%y.%m)"
+          last="$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate --jq '.[].tag_name' \
+                  | grep -E "^${prefix}\.[0-9]+$" \
+                  | sed -E "s/^${prefix}\.//" \
+                  | sort -n | tail -1 || true)"
+          next="$(printf '%02d' "$(( ${last:-0} + 1 ))")"
+          echo "tag=${prefix}.${next}" >> "$GITHUB_OUTPUT"
+          echo "Releasing ${prefix}.${next}"
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ls -l dist
+          gh release create "${{ steps.ver.outputs.tag }}" \
+            --target "${GITHUB_SHA}" \
+            --title "${{ steps.ver.outputs.tag }}" \
+            --generate-notes \
+            dist/gemini-web-cli-linux-amd64 \
+            dist/gemini-web-cli-linux-arm64
