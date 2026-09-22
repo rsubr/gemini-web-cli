@@ -1,0 +1,35 @@
+# Compiled Go binary (module name == output name)
+/gemini-web-cli
+*.exe
+*.test
+*.out
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.uv-cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+cookies.json
+
+# Chrome profiles / runtime junk
+gemini-cli-profile/
+*.log
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local agent/skill scratch
+.agents/
