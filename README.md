@@ -16,7 +16,7 @@ google-chrome --headless=new --remote-debugging-port=9222 --user-data-dir=/tmp/g
 
 Instead of a local Chrome, run [`chromedp/headless-shell`](https://hub.docker.com/r/chromedp/headless-shell) as a container. It exposes the same DevTools endpoint on port 9222, so both CLIs talk to it unchanged.
 
-The repo ships a `docker-compose.yml`:
+Save the following as `docker-compose.yml`:
 
 ```yaml
 name: headless-shell
